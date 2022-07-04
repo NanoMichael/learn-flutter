@@ -166,9 +166,58 @@ C++，emmm，它的模板是型不变的（应该说和通常所说的泛型关�
 
 - [Kotlin 泛型](https://kotlinlang.org/docs/generics.html#variance)
 
+### extension
+
+dart 扩展函数，还是挺有意思，举几个🌰：
+
+```dart
+extension IterableExt<T> on Iterable<T> {
+  Iterable<R> fmap<R>(Iterable<R> Function(T t) convert) sync* {
+    for (final t in this) {
+      for (final r in convert(t)) {
+        yield r;
+      }
+    }
+  }
+
+  Iterable<B> zip<A, B>(Iterable<A> a, B Function(T x, A y) convert) sync* {
+    for (final t in this) {
+      yield convert(t, a.first);
+      a = a.skip(1);
+      if (a.isEmpty) break;
+    }
+  }
+}
+
+extension NullableListExt<T> on List<T>? {
+  bool get isNullOrEmpty => this?.isEmpty ?? true;
+
+  bool get isNotNullAndEmpty => !isNullOrEmpty;
+}
+
+extension ScopedExt<T> on T {
+  Iterable<T> repeat(int n) sync* {
+    for (var i = 0; i < n; i++) {
+      yield this;
+    }
+  }
+
+  T also(void Function(T it) block) {
+    block(this);
+    return this;
+  }
+
+  R let<R>(R Function(T it) convert) {
+    return convert(this);
+  }
+}
+```
+
+可玩性挺高，可惜的是，dart 不支持 function receiver 语法，相比 Kt 来说还是弱点，虽然有 [proposal](https://github.com/dart-lang/sdk/issues/34362)，但是还是没有实现。
+
 ### [dart 协程](https://dart.dev/codelabs/async-await)
 
-没啥好说的，跟 Kotlin 不一样，没有 coroutine scope 的概念，所以取消啥的要麻烦些。
+没啥好说的，没有 coroutine scope 的概念，所以取消啥的要麻烦些。
 
 先看个 🌰：
 

@@ -93,7 +93,7 @@ ninja -C out/host_debug_unopt
 
 ## 实验自定义引擎
 
-创建一个新 flutter 项目，设置 flutter engine 为你刚编译的 engine，设置编译环境，修改项目 pubspec：
+创建一个新 flutter 项目，假设命名为 `hello_flutter`，设置 flutter engine 为你刚编译的 engine，设置编译环境，修改项目 pubspec：
 
 ```yaml
 dependency_overrides:
@@ -101,7 +101,7 @@ dependency_overrides:
     path: <your-engine-repository>/src/out/host_debug_unopt/gen/dart-pkg/sky_engine
 ```
 
-我们尝试使用刚添加的 `drawDummy` 方法实现一个自定义 widget，创建文件 `dummy.dart`：
+尝试使用刚添加的 `drawDummy` 方法实现一个自定义 widget，创建文件 `dummy.dart`：
 
 ```dart
 class Dummy extends LeafRenderObjectWidget {
@@ -139,6 +139,8 @@ flutter run -d macOS --local-engine-src-path <your-engine-repository>/src \
 
 If you do this 中的 this，指的是配置 `dependency_overrides`，但是发现不管用，所以还是手动指定一下这俩参数。
 
+也可以配置 Android Studio，在 `Edit configuration` 添加上述参数，通过 Run 来运行项目。
+
 会发现报 `_MulticastCanvas` 没有实现 `drawDummy`
 方法，找到文件 `<your-flutter-repository>/packages/flutter/lib/src/widgets/widget_inspector.dart` 实现 `drawDummy`
 方法，会发现报错 `Canvas` 没这个方法 🤔。
@@ -151,7 +153,7 @@ dependency_overrides:
     path: <your-engine-repository>/src/out/host_debug_unopt/gen/dart-pkg/sky_engine
 ```
 
-再次更新 packages，实现 `drawDummy`。回到实验项目，编译运行，至此可正常运行。
+再次更新 packages，实现 `drawDummy`。回到实验项目，编译运行。
 
 ## 参考
 

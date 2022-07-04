@@ -72,8 +72,6 @@ git remote -v
 ninja -C out/host_debug_unopt
 ```
 
-更多参数可参考 `./flutter/tools/gn --help`
-
 - 编译 iOS
 
 ```shell
@@ -96,6 +94,8 @@ ERROR at //build/config/android/config.gni:55:5: Assertion failed.
 
 原因是目前还不支持在苹果新芯片上交叉编译 Android。(TODO)
 
+更多参数可参考 `./flutter/tools/gn --help`，根据自己的需要编译成不同的架构。
+
 在 host 编译完成之后，执行以下命令：
 
 ```shell
@@ -103,6 +103,8 @@ cd src/flutter && ln ../out/host_debug_unopt/compile_commands.json compile_comma
 ```
 
 此时使用 CLion 打开 src/flutter 就能愉快的修改/查看引擎代码了（当然你也可以直接打开，但是没有代码提示和跳转功能）。
+
+关于 `compile_commands.json`，可以参考 [Compilation database](https://clion.jetbrains.com/help/c/external-tools/compile-commands.html) 和 [JSON Compilation Database Format Specification](https://clang.llvm.org/docs/JSONCompilationDatabase.html)。
 
 ## 参考
 
