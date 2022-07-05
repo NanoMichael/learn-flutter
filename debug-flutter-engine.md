@@ -7,9 +7,7 @@
 
 以下都以实验项目 `hello_flutter` 为例.
 
-## 调试 host
-
-### 调试 MacOS
+## 调试 MacOS
 
 可以看到最终的打包产物位于 `<test-project>/build/macos/Build/Products/Debug/hello_flutter.app/Contents/MacOS/` 目录下，入口可执行文件为 `hello_flutter`。
 
@@ -76,7 +74,21 @@ VSCode 也支持 [JSON Compilation Database Format Specification](https://clang.
 
 ### 配置 CLion
 
-对于喜欢使用 CLion 的开发者，配置则要麻烦很多。
+对于喜欢使用 CLion 的开发者：
+
+- Attach 到已运行项目，**Run > Attach to Process**，将 debugger attach 到指定进程，如图：
+
+![img.png](imgs/debug-clion.png)
+
+- 配置 Run configuration，打开 **Edit Configurations** 选择 **Custom Build Application**，如图：
+
+![img.png](imgs/debug-host-clion-custom.png)
+
+选择编译好的实验项目，如图：
+
+![img.png](imgs/debug-host-clion-custom2.png)
+
+然后调试即可，非常简单方便。
 
 ## 调试 Android
 
