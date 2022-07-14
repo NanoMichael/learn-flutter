@@ -37,7 +37,8 @@ flutter packages upgrade && flutter packages get
 
 参考编译 flutter engine，直接在 CLion 中打开 engine 项目即可。
 
-⚠️注意如果同时涉及到修改 framework 和 engine 的代码，要保持 framework 和 engine 代码版本一致。举个🌰，都基于 dev 分支开发。
+> ⚠️注意如果同时涉及到修改 framework 和 engine 的代码，要保持 framework 和 engine 代码版本一致。
+> 一般来说，framework 基于 `main` 分支，engine 基于 `master` 分支。
 
 ## 修改 Engine 代码
 

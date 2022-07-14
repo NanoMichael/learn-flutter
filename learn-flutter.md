@@ -15,9 +15,11 @@
 
 ### [Runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters)
 
-简单来说，`Runes` 计算字符串的 Unicode 码点。有个词很有意思：`user-perceived characters`，_用户可感知的字符_，又叫 [Unicode (extended) grapheme cluster](https://unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)，Unicode 字形（叫字素可能更合适）簇。Dart 使用 UTF-16 编码，因此对于码点超过 2 字节的字符，需要使用[这个东西](https://pub.dev/packages/characters)。
+简单来说，`Runes` 计算字符串的 Unicode 码点。有个词很有意思：`user-perceived characters`，**用户可感知的字符**，又叫 [Unicode (extended) grapheme cluster](https://unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)，Unicode 字形（叫字素可能更合适）簇。Dart 使用 UTF-16 编码，因此对于码点超过 2 字节的字符，需要使用[这个东西](https://pub.dev/packages/characters)。
 
-为啥不用 UTF-8？可能是因为计算单个码点有点复杂。既然如此，又为啥不用 UTF-32？完全不需要计算码点。UTF-32 空间浪费严重，绝大多数码点不会超过 16 位。使用 UTF-16 平衡了这两点。但是使用 UTF-16 也有很多问题，比如最典型的 `surrogate pair`，没验证过 dart 有没有处理 `surrogate pair` 的异常情况，有时间再搞。
+为啥不用 UTF-8？可能是因为计算单个码点有点复杂，尤其在遍历时，无论是往前还是往后，都需要根据当前 byte 的值来计算前一个或后一个码点；并且不能简单从 byte sequence 的某一处向前或向后遍历（因为当前 byte 大概率并不是码点的开始，因此若要从某一处遍历必须遍历完这一处之前的所有码点）。
+
+既然如此，又为啥不用 UTF-32？完全不需要计算码点。UTF-32 空间浪费严重，绝大多数码点不会超过 16 位，而超过 16 位的码点通过 `surrogate pair` 来解决，这比起遍历 UTF-8 要简单得多，使用 UTF-16 平衡了这两点。但是使用 UTF-16 也有很多问题，比如最典型的 `surrogate pair` 倒序，没验证过 dart 有没有处理 `surrogate pair` 的异常情况，有时间再搞。
 
 Unicode 字符会影响文字排版，比如：`bidi`，会改变文字的排版方向（常见的阿拉伯文，希伯来文）；比如竖排文本（蒙古语等，参考[这里](https://github.com/flutter/flutter/issues/35994))；比如零宽连接符（👩 + 👦 = 👩‍👦）；总之 Unicode 字符集水很深，不是一两句能说得完。
 
@@ -166,7 +168,37 @@ C++，emmm，它的模板是型不变的（应该说和通常所说的泛型关�
 
 - [Kotlin 泛型](https://kotlinlang.org/docs/generics.html#variance)
 
-### extension
+### Generator
+
+Dart 统一了 `Iterable` 和同步 `Generator`，都用 `Iterable` 表示，异步生成器用 `Stream` 来表示。同步生成器函数使用 `sync*` 修饰，异步生成器用 `async*` 修饰。举个 🌰：
+
+- 同步生成器
+
+```dart
+Iterable<int> fibonacci() sync* {
+  int a = 0, b = 1;
+  while (true) {
+    yield a;
+    final int temp = a;
+    a = b;
+    b = temp + b;
+  }
+}
+```
+
+- 异步生成器
+
+```dart
+Stream<int> produce() async* {
+  int i = 0;
+  while (true) {
+    await Future.delayed(Duration(seconds: 1));
+    yield i++;
+  }
+}
+```
+
+### Extension
 
 dart 扩展函数，还是挺有意思，举几个🌰：
 
@@ -214,6 +246,117 @@ extension ScopedExt<T> on T {
 ```
 
 可玩性挺高，可惜的是，dart 不支持 function receiver 语法，相比 Kt 来说还是弱点，虽然有 [proposal](https://github.com/dart-lang/sdk/issues/34362)，但是还是没有实现。
+
+### duck type
+
+[proposal](https://github.com/dart-lang/language/issues/1612) here, NOT IMPLEMENTED.
+
+[Construction of generic types "new T()"](https://github.com/dart-lang/sdk/issues/30074)， 看起来是不准备实现了。
+
+没研究 dart 反射，用反射应该可以实现 duck type。
+
+在 Kotlin 中实现一个简单的 `duck type cast` 😊（总是不自觉跟 Kotlin 对比）:
+
+```kotlin
+class DuckTypeProxy(private val delegator: Any) : InvocationHandler {
+  override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
+    val (dispatcher, fn) = if (delegator is Class<*>) {
+      null to delegator.getMethod(method.name, *method.parameterTypes)
+    } else {
+      delegator to delegator.javaClass.getMethod(method.name, *method.parameterTypes)
+    }
+    return if (args == null) fn.invoke(dispatcher) else fn.invoke(dispatcher, *args)
+  }
+}
+
+inline fun <reified T> Any.duckCast(): T {
+  return Proxy.newProxyInstance(javaClass.classLoader, arrayOf(T::class.java), DuckProxy(this)) as T
+}
+
+interface Swimmable {
+  fun swim()
+}
+
+class Duck {
+  fun swim() = println("duck swimming")
+}
+
+class Goose {
+  fun swim() = println("goose swimming")
+}
+
+fun main() {
+  val duck = Duck()
+  val goose = Goose()
+  duck.duckCast<Swimmable>().swim()
+  goose.duckCast<Swimmable>().swim()
+}
+```
+
+这非常有用，尤其是当引入第三方库，或者自动生成的代码，又无法扩展库内的功能时，可以使用这个方法。举个喜闻乐见的 🌰，自动生成的 json 序列化代码，它们都有一个静态的工厂方法 `fromJson` 来构造对象，我们可能需要在 Retrofit 中使用，而无法修改这些代码，那么就可以使用这个方法。
+
+```kotlin
+class Duck(private val name: String) {
+  companion object {
+    @JvmStatic
+    fun fromJson(json: JSONObject): Duck {
+      return Duck(json.getString("name"))
+    }
+  }
+  // ...
+}
+
+class Goose(private val name: String) {
+  companion object {
+    @JvmStatic
+    fun fromJson(json: JSONObject): Goose {
+      return Goose(json.getString("name"))
+    }
+  }
+  // ...
+}
+
+interface FromJson<T> {
+  fun fromJson(json: JSONObject): T
+}
+
+// FromJsonAdapter 实现 Retrofit 的 Converter 接口，这里简化
+object FromJsonAdapter {
+  @JvmStatic
+  fun <T> new(clazz: Class<T>, json: JSONObject): T {
+    return clazz.duckCast<FromJson<T>>().fromJson(json)
+  }
+}
+
+fun swim(obj: Any) {
+  try {
+    obj.duckCast<Swimmable>().swim()
+  } catch (e: Exception) {
+    println("cannot swim")
+  }
+}
+
+fun main() {
+  val json = JSONObject("{\"name\":\"Donald\"}")
+  val duck = FromJsonAdapter.new(Duck::class.java, json)
+  swim(duck)
+
+  val json2 = JSONObject("{\"name\":\"Golden\"}")
+  val goose = FromJsonAdapter.new(Goose::class.java, json2)
+  swim(goose)
+}
+```
+
+### Pattern matching
+
+暂不支持，有望实现，[proposal](https://github.com/dart-lang/language/issues/546)。
+
+参考一些实现：
+
+- [union](https://github.com/rrousselGit/union)
+- [match](https://github.com/mrbech/match)
+
+Roadmap 可以看[这里](https://github.com/dart-lang/language/blob/master/working/0546-patterns/goals-and-constraints.md)。
 
 ### [dart 协程](https://dart.dev/codelabs/async-await)
 
