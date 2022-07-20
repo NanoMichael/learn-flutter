@@ -6,7 +6,7 @@
 
 [A tour of the Dart language](https://dart.dev/guides/language/language-tour)
 
-没啥好记的，但是有一些有趣的东西。
+有一些有趣的东西。
 
 - 判断两个对象相同，`identical`
 - 两个 `const` 对象，在运行时是 `identical` 的
