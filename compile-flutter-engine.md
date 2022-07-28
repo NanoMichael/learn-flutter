@@ -117,6 +117,22 @@ ERROR at //build/config/android/config.gni:55:5: Assertion failed.
 
 更多参数可参考 `./flutter/tools/gn --help`。
 
+## 编译 Web Engine
+
+编译 Web Engine 使用 `felt`（Flutter Engine Local Tester 的缩写）工具，首先导出 `felt` 到 PATH：
+
+```shell
+export PATH=$PATH:<ENGINE_ROOT>/src/flutter/lib/web_ui/dev
+```
+
+ENGINE_ROOT 为引擎根目录。`felt` 的使用形式为：`felt <command>`，其中 `command` 可以是：
+
+- `build`，编译引擎
+- `test`，测试引擎
+- `help`，获取帮助
+
+要获取子命令的使用帮助，执行 `felt help <command>`。
+
 ## 在 IDE 中查看引擎代码
 
 在 host 编译完成之后，执行以下命令：
@@ -136,3 +152,4 @@ VSCode 也支持 `compilation database` 功能，直接打开工程目录即可�
 - [Contributing to the Flutter engine](https://chromium.googlesource.com/external/github.com/flutter/engine/+/b7358b33dbd61e124720165dd939fa49cbd0ecb6/CONTRIBUTING.md)
 - [Setting up the Engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment)
 - [Compiling the engine](https://github.com/flutter/flutter/wiki/Compiling-the-engine)
+- [Flutter web engine](https://github.com/flutter/engine/blob/main/lib/web_ui/README.md)
