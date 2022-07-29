@@ -133,6 +133,25 @@ ENGINE_ROOT 为引擎根目录。`felt` 的使用形式为：`felt <command>`，
 
 要获取子命令的使用帮助，执行 `felt help <command>`。
 
+单独编译 skia 库：
+
+```shell
+cd <ENGINE_ROOT>/src/third_party/skia
+python3 tools/git-sync-deps
+./bin/gn gen out/Debug
+ninja -C out/Debug
+```
+
+编译 CanvasKit:
+
+```shell
+cd <ENGINE_ROOT>/src/third_party/skia/modules/canvaskit
+./compile.sh
+```
+
+- [how to build skia](https://skia.org/docs/user/build/)
+- [build canvaskit](https://github.com/google/skia/tree/main/modules/canvaskit) 
+
 ## 在 IDE 中查看引擎代码
 
 在 host 编译完成之后，执行以下命令：
