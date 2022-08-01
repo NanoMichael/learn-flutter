@@ -133,6 +133,20 @@ ENGINE_ROOT 为引擎根目录。`felt` 的使用形式为：`felt <command>`，
 
 要获取子命令的使用帮助，执行 `felt help <command>`。
 
+运行测试项目：
+
+```shell
+flutter run -d chrome --local-engine-src-path /Users/bytedance/dev/engine/src \
+--local-engine=/Users/bytedance/dev/engine/src/out/host_debug_unopt --web-renderer canvaskit
+```
+
+其中，`--web-renderer` 可为：
+
+- `canvaskit`，使用 CanvasKit 渲染器
+- `html`，使用 HTML 渲染器
+
+## 编译 Skia
+
 单独编译 skia 库：
 
 ```shell
@@ -165,6 +179,8 @@ cd src/flutter && ln ../out/host_debug_unopt/compile_commands.json compile_comma
 关于 `compile_commands.json`，可以参考 [Compilation database](https://clion.jetbrains.com/help/c/external-tools/compile-commands.html) 和 [JSON Compilation Database Format Specification](https://clang.llvm.org/docs/JSONCompilationDatabase.html)。
 
 VSCode 也支持 `compilation database` 功能，直接打开工程目录即可。
+
+对于 Web engine 代码，直接使用 Android Studio 打开 `<ENGINE_ROOT>/src/flutter/lib/web_ui` 即可。
 
 ## 参考
 

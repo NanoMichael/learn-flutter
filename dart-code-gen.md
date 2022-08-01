@@ -32,7 +32,7 @@ dependencies:
 
 ```yaml
 dev_dependencies:
-  source_gen: '^1.2.2' 
+  source_gen: '^1.2.2'
 ```
 
 在 test_gen_annotations 中添加类 `DummyAnnotation`，这个类没有任何意义，仅仅用来测试而已。注意：**Annotation 类构造器必须为 const (why?)**。
@@ -61,16 +61,70 @@ class ADummyClass {}
 ```dart
 // desc: $comment
 // with a dummy id: $id
-const DUMMY_COMMENT_${className} = "$comment";
+const DUMMY_COMMENT_${className}_${suffix} = "$suffix: $comment";
 ```
 
-（这自然也没任何意义，仅仅用来测试而已。）
+编写代码：（这自然也没任何意义，仅仅用来测试而已。）
 
-Dart 很奇怪，一个 dart 源文件就是一个 library。
+```dart
+class DummyGenerator extends GeneratorForAnnotation<DummyAnnotation> {
+  final String nameSuffix;
+
+  DummyGenerator(this.nameSuffix);
+
+  @override
+  generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
+    final id = annotation.peek('id')?.intValue;
+    final comment = annotation.peek('comment')?.stringValue;
+    return '''
+    // desc: $comment
+    // with a dummy id: $id
+    const DUMMY_COMMENT_${element.name}_$nameSuffix = "$nameSuffix: $comment";
+    ''';
+  }
+}
+```
+
+### LibraryBuilder
+
+如果想生成独立的 Dart 文件，这个文件可被 import，使用 `LibraryBuilder`：
+
+```dart
+Builder libBuilder(BuilderOptions options) => 
+    LibraryBuilder(DummyGenerator(''), generatedExtension: '.t.g.dart');
+```
+
+然后执行 `flutter packages pub run build_runner build` 生成代码。
+
+也可以通过：
+
+```shell
+cd <your-project-dir>
+.dart_tool/build/entrypoint/build.dart build
+```
+
+来生成代码（实际上通过 flutter pub 也是调用的 build.dart）。
+
+> 为啥叫 `LibraryBuilder`，Dart 中一个源文件也可被称为一个 `library`。
+
+### PartBuilder
+
+### SharedPartBuilder
+
+参考：
+
+- [source gen](https://pub.dev/packages/source_gen)
 
 ## Aggregate builder
 
 ## 收集子库注解
+
+oops，并不支持，并且以后也不会支持，dart 给出的原因是：
+
+- 性能原因。收集子库代码是一个很耗时的过程，尤其是对于一些中大型的项目，如果使用不当会极大拖慢编译速度（当然可以通过 cache 来解决这种问题，但是很容易误用）。
+- 技术原因。Dart 目前因为技术原因无法支持（我不信。。。
+
+提了一个 [issue](https://github.com/dart-lang/build/issues/3339)，可以看下。
 
 ## 调试
 
