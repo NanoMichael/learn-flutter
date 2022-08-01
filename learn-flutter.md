@@ -21,7 +21,9 @@
 
 既然如此，又为啥不用 UTF-32？完全不需要计算码点。UTF-32 空间浪费严重，绝大多数码点不会超过 16 位，而超过 16 位的码点通过 `surrogate pair` 来解决，这比起遍历 UTF-8 要简单得多，使用 UTF-16 平衡了这两点。但是使用 UTF-16 也有很多问题，比如最典型的 `surrogate pair` 倒序，没验证过 dart 有没有处理 `surrogate pair` 的异常情况，有时间再搞。
 
-Unicode 字符会影响文字排版，比如：`bidi`，会改变文字的排版方向（常见的阿拉伯文，希伯来文）；比如竖排文本（蒙古语等，参考[这里](https://github.com/flutter/flutter/issues/35994))；比如零宽连接符（👩 + 👦 = 👩‍👦）；总之 Unicode 字符集水很深，不是一两句能说得完。
+Unicode 字符会影响文字排版，比如：`bidi`，会改变文字的排版方向（常见的阿拉伯文，希伯来文）；比如竖排文本（蒙古语等，参考[这里](https://github.com/flutter/flutter/issues/35994))；比如零宽连接符（👩 + 👦 = 👩‍👦）；总之 Unicode 字符集的细节太多，其中很多字符又与渲染和排版耦合（主要原因是本来这些语言字素和书写是耦合的，比如著名的阿拉伯-希伯来文，印地语等），毕竟要统一所有语言是一件很复杂的事情（这让我想起来通天塔的故事），需要各个语言领域的专家做这些这些事情。目前 Flutter 上用的 shaping engine 是 Harfbuzz。
+
+相对来说，中文和英文的排版就简单得多。中文就更简单了，因为都是方块字，每个字素的大小、metrics（ascent，descent，width）都是确定的；而英文还需要处理诸如连字（ligature）、间距微调（kerning）、Font features（手写体，old-styled numbers...）等等相关特性。
 
 参考：
 
@@ -30,6 +32,7 @@ Unicode 字符会影响文字排版，比如：`bidi`，会改变文字的排版
 - [Zero-width joiner](https://en.wikipedia.org/wiki/Zero-width_joiner)
 - [UTF-8 转 UTF-32](https://github.com/NanoMichael/MicroTeX/blob/da9ed490c5f21a10914a3b222099b7a3b102478f/lib/utils/utf.cpp#L53)
 - [Recommended Emoji ZWJ Sequences](https://unicode.org/emoji/charts/emoji-zwj-sequences.html)
+- [Harfbuzz](https://harfbuzz.github.io/index.html)
 
 TODO:
 
