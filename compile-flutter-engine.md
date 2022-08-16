@@ -84,7 +84,7 @@ ninja -C out/host_debug_unopt
 ./flutter/tools/gn --android --unoptimized
 ```
 
-对于 Apple Silicon，你会惊喜的得到这个报错：
+~~对于 Apple Silicon，你会惊喜的得到这个报错：~~
 
 ```shell
 ERROR at //build/config/android/config.gni:55:5: Assertion failed.
@@ -92,7 +92,11 @@ ERROR at //build/config/android/config.gni:55:5: Assertion failed.
     ^-----
 ```
 
-原因是目前还不支持在苹果新芯片上交叉编译 Android。(TODO)
+~~原因是目前还不支持在苹果新芯片上交叉编译 Android。(TODO)~~
+
+更新（2022.7.30）：
+
+从 `upstream` 更新最新代码后已经支持在苹果新芯片上交叉编译 Android，没有查证啥时候支持了。
 
 参考以下选项来编译不同架构的目标：
 
@@ -136,8 +140,9 @@ ENGINE_ROOT 为引擎根目录。`felt` 的使用形式为：`felt <command>`，
 运行测试项目：
 
 ```shell
-flutter run -d chrome --local-engine-src-path /Users/bytedance/dev/engine/src \
---local-engine=/Users/bytedance/dev/engine/src/out/host_debug_unopt --web-renderer canvaskit
+flutter run -d chrome --local-engine-src-path <ENGINER_ROOT>/src\
+--local-engine=<ENGINER_ROOT>/src/out/host_debug_unopt\
+--web-renderer canvaskit
 ```
 
 其中，`--web-renderer` 可为：
@@ -146,6 +151,8 @@ flutter run -d chrome --local-engine-src-path /Users/bytedance/dev/engine/src \
 - `html`，使用 HTML 渲染器
 
 ## 编译 Skia
+
+`Cavaskit` 将 `skia` 编译成 wasm，web engine 默认使用预编译好的 `Canvaskit` 渲染器（release 模式，没有 dwarf 符号，无法调试），如果想要调试 `Canvaskit`，需要手动编译。
 
 单独编译 skia 库：
 
@@ -160,7 +167,20 @@ ninja -C out/Debug
 
 ```shell
 cd <ENGINE_ROOT>/src/third_party/skia/modules/canvaskit
-./compile.sh
+./compile.sh debug_build
+```
+
+`debug_build` 编译为 Debug 包，方便查看生成的 js 代码，如果需要查看 CanvasKit 对 js 的接口，这非常有用。
+
+执行以下命令，把生成的 wasm 和 js 文件拷贝到 build 目录下，编译 example：
+
+```shell
+# The following installs all npm dependencies and only needs to be when setting up
+# or if our npm dependencies have changed (rarely).
+npm ci
+
+make release  # make debug is much faster and has better error messages
+make local-example
 ```
 
 - [how to build skia](https://skia.org/docs/user/build/)
@@ -188,3 +208,11 @@ VSCode 也支持 `compilation database` 功能，直接打开工程目录即可�
 - [Setting up the Engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment)
 - [Compiling the engine](https://github.com/flutter/flutter/wiki/Compiling-the-engine)
 - [Flutter web engine](https://github.com/flutter/engine/blob/main/lib/web_ui/README.md)
+
+## 编译 dart-sdk
+
+```shell
+./tools/build.py --no-goma --mode debug --arch x64 --export-compile-commands create_sdk
+```
+
+**`--export-compile-commands` 将导出 [Compilation database](https://clion.jetbrains.com/help/c/external-tools/compile-commands.html) 到 compile_commands.json 文件，没有这个参数查看 dart vm 的代码比较费劲。** 参考[这个 PR](https://groups.google.com/a/dartlang.org/g/reviews/c/fFImE0AQ6z8)。
