@@ -468,6 +468,8 @@ CLion run configuration:
 
 - [Debugging with GDB](https://wladimir-tm4pda.github.io/porting/debugging_gdb.html)
 - [CLion Remote Debug](https://www.jetbrains.com/help/clion/remote-debug.html)
+- [Debug the engine](https://github.com/flutter/flutter/wiki/Debugging-the-engine)
+- [Flutter gdb tools](https://github.com/flutter/engine/blob/master/sky/tools/flutter_gdb#L13) 
 
 ### 配置 VSCode
 
