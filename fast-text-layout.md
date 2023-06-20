@@ -1,0 +1,39 @@
+[(WIP) fast text layout](https://github.com/NanoMichael/engine/pull/3)
+
+- ✅ 判断中文字符耗时测试
+- Itemization 对比/优化
+  - ✅ minikin，pass，太慢了
+  - ✅ Skia font，依赖平台，macOS/iOS 使用 Core Text，Android/Linux 使用 Freetype
+  - ✅ Harfbuzz
+  - ⏳ Freetype
+  - ✅ 自定义 cmap coverage，jump table 优化
+- 多语言能力
+  - ✅ cluster 分簇
+  - ⏳ decomposition
+  - ⏳ grapheme boundary UAX #29
+  - ✅ multi font family & font fallback
+  - ✅ code-unit 到 glyph 映射
+  - ✅ variation selector
+  - ✅ Emoji & Emoji modifier
+  - ⏳ NBSP & NNBSP
+  - ✅ space standalone
+  - ⏳ justify
+  - ⏳ ghost run
+  - ⏳ min & max intrinsic width
+  - ✅ 超长单词，多 space 分割
+- 基础能力
+  - ✅ UAX #14 换行算法
+  - ✅ 对齐方式（left，center，right）
+  - ✅ Line limit
+  - ✅ 下划线、背景色、阴影
+  - ⏳ ellipsize
+  - ⏳ 获取指定文本框和文本位置（用于文本选择）
+  - ❓ bidi 及 RTL
+- Flutter 上层功能支持
+  - ✅ Strut 支持
+  - ✅ 富文本
+  - ✅ placeholder span
+- 单元测试
+  - ⏳ itemize（主要测试 cmap 和 minikin 获取到的字形是否一致）
+  - ⏳ 换行和 line limit
+  - ⏳ 富文本
